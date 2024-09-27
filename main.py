@@ -2,6 +2,7 @@ import pandas as pd
 import cv2
 from ultralytics import YOLO
 from flask import Flask, jsonify, request
+import os
 
 # Create a Flask application
 app = Flask(__name__)
@@ -11,6 +12,8 @@ model = YOLO("best.pt")  # Replace with your trained model path
 
 # Print model class names to debug
 print("Model class names:", model.names)
+
+app.config['UPLOAD_FOLDER'] = "uploads/"
 
 # Define a function to process video and apply detection boxes
 def process_video(input_video_path):
@@ -92,12 +95,17 @@ def video_processing_api():
     # Get the video path from the request
     video_path = request.files.get('video_path')  # Expecting JSON with {"video_path": "path/to/video.mp4"}
 
+    if video_path:
+        # Save the file to the upload folder
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], video_path.filename)
+        video_path.save(filepath)
+
     if not video_path:
         return jsonify({"error": "No video path provided"}), 400
 
     try:
         # Process the video and get results
-        results = process_video(video_path)
+        results = process_video(filepath)
         return jsonify(results)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
