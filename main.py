@@ -109,6 +109,10 @@ def video_processing_api():
         return jsonify(results)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/')
+def home():
+    return "Welcome to the YOLO API!"
 
 if __name__ == '__main__':
     app.run(debug=True)
